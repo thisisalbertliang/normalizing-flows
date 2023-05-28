@@ -101,7 +101,7 @@ class NormalizingFlow(nn.Module):
         log_q += self.q0.log_prob(z)
         return -torch.mean(log_q)
 
-    def reverse_kld(self, num_samples=1, beta=1.0, score_fn=True):
+    def reverse_kld(self, num_samples=1, beta=1.0, score_fn=True, energy_based=False):
         """Estimates reverse KL divergence, see [arXiv 1912.02762](https://arxiv.org/abs/1912.02762)
 
         Args:
@@ -127,8 +127,14 @@ class NormalizingFlow(nn.Module):
                 log_q += log_det
             log_q += self.q0.log_prob(z_)
             utils.set_requires_grad(self, True)
-        log_p = self.p.log_prob(z)
-        return torch.mean(log_q) - beta * torch.mean(log_p)
+
+        if energy_based:
+          E_target = self.p.energy(z)
+          loss = log_q + E_target
+          return loss.mean()
+        else:
+          log_p = self.p.log_prob(z)
+          return torch.mean(log_q) - beta * torch.mean(log_p)
 
     def reverse_alpha_div(self, num_samples=1, alpha=1, dreg=False):
         """Alpha divergence when sampling from q

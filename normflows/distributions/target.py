@@ -29,6 +29,16 @@ class Target(nn.Module):
         """
         raise NotImplementedError("The log probability is not implemented yet.")
 
+    def energy(self, z):
+        """
+        Args:
+          z: value or batch of latent variable
+
+        Returns:
+          energy of the distribution for z
+        """
+        return NotImplementedError("The energy is not implemented yet.")
+
     def rejection_sampling(self, num_steps=1):
         """Perform rejection sampling on image distribution
 
